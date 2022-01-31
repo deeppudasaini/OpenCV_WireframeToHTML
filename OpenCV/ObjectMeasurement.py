@@ -1,10 +1,9 @@
 import cv2
 import Utils
 
+
 ###################################
 webcam = False
-
-
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 cap.set(10, 160)
 cap.set(3, 1920)
@@ -19,7 +18,7 @@ while True:
     if webcam:
         success, img = cap.read()
     else:
-        img = cv2.imread('OpenCV/5.png')
+        img = cv2.imread('OpenCV/6.png')
 
     imgContours, conts = Utils.getContours(img, minArea=50000, filter=4)
     if len(conts) != 0:
@@ -30,9 +29,14 @@ while True:
                                                  minArea=2000, filter=4,
                                                  cThr=[50, 50], draw=False)
         if len(conts) != 0:
+            div = ""
 
+            f = open("final.html", "w+")
+            f.write(
+                "<!DOCTYPE html>\n<html>\n<head>\n<title>Test</title>\n</head>\n<body>\n")
             for obj in conts2:
                 cv2.polylines(imgContours2, [obj[2]], True, (0, 255, 0), 2)
+
                 nPoints = Utils.reorder(obj[2])
                 nW = round(
                     (Utils.findDis(nPoints[0][0]//scale, nPoints[1][0]//scale)/10), 1)
@@ -47,12 +51,16 @@ while True:
                             (255, 0, 255), 2)
                 cv2.putText(imgContours2, '{}cm'.format(nH), (x - 70, y + h // 2), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1.5,
                             (255, 0, 255), 2)
-                f = open("final.txt", "w+")
-                f.write(
-                    "<!DOCTYPE html><html><head><title>Test</title></head><body>")
+                # margin: 10px 5px 15px 20px;
+                # top margin is 10px
+                # right margin is 5px
+                # bottom margin is 15px
+                # left margin is 20px
+                f.write('<div style=\"height:{}px;width:{}px;border:solid;margin:{}px 0px 0px {}px\">\nheight:{}, width:{}</div>'.format(
+                    nH*37, nW*37, (((297/10)*37-nH*37)), ((210/10)*37-nW*37), (nH), (nW)))
 
-                f.write("</body></html>")
-                f.close()
+        f.write("\n</body>\n</html>")
+        f.close()
         cv2.imshow('A4', imgContours2)
 
     img = cv2.resize(img, (0, 0), None, 0.5, 0.5)
